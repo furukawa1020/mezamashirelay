@@ -16,7 +16,7 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-      - name: Debug: print environment
+      - name: 'Debug: print environment'
         run: |
           echo "---- environment ----"
           node -v || true
@@ -24,24 +24,24 @@ jobs:
           uname -a || true
           echo "---- npm config ----"
           npm config list || true
-      - name: Debug: repo files
+      - name: 'Debug: repo files'
         run: |
           echo "---- ls root ----"
           ls -la
           echo "---- show package.json ----"
           cat package.json
-      - name: Install (verbose)
+      - name: 'Install (verbose)'
         run: npm ci --loglevel=verbose
-      - name: Build (verbose)
+      - name: 'Build (verbose)'
         run: |
           set -o pipefail
           npm run build --silent 2>&1 | sed -n '1,200p'
-      - name: Debug: show dist tree
+      - name: 'Debug: show dist tree'
         if: ${{ always() }}
         run: |
           echo "---- dist exists? ----"
           if [ -d dist ]; then ls -la dist || true; echo "---- dist/assets ----"; if [ -d dist/assets ]; then ls -la dist/assets || true; fi; else echo 'no dist dir'; fi
-      - name: Smoke test
+      - name: 'Smoke test'
         run: npm run smoke
 
   # Optional: Netlify deploy if NETLIFY_AUTH_TOKEN and NETLIFY_SITE_ID are provided
