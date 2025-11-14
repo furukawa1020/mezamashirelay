@@ -28,6 +28,44 @@ npm run dev
 
 デプロイ
 - Vercel や Netlify にデプロイできます。ビルドコマンドは `npm run build`、公開ディレクトリは `dist` です。
+- Vercel や Netlify にデプロイできます。ビルドコマンドは `npm run build`、公開ディレクトリは `dist` です。
+
+デプロイ手順（Netlify）
+
+1. GitHub にリポジトリを push
+2. Netlify にログイン → New site from Git → GitHub を選択
+3. Build command: `npm run build`、Publish directory: `dist`
+4. (重要) Netlify の Site settings → Build & deploy → Environment に Firebase の設定値を追加してください（例: FIREBASE_API_KEY, FIREBASE_AUTH_DOMAIN, FIREBASE_PROJECT_ID）。
+
+デプロイ手順（Firebase Hosting）
+
+1. Firebase CLI をインストール:
+
+```powershell
+npm install -g firebase-tools
+```
+
+2. Firebase にログイン:
+
+```powershell
+firebase login
+```
+
+3. プロジェクトを初期化（既に Firebase プロジェクトを作成済み）:
+
+```powershell
+firebase use --add
+firebase init hosting
+```
+
+4. ビルドしてデプロイ:
+
+```powershell
+npm run build
+firebase deploy --only hosting
+```
+
+注意: `src/services/auth.tsx` と `src/services/firestore.ts` の `firebaseConfig` に Firebase の Web 設定を貼り付けてください。Netlify や Firebase の環境変数を使う場合は、`src/services` 側で process.env の利用に切り替えてください（現状はファイル内定義の簡易版です）。
 
 BLE タグ (ESP32C3 + MPU6050)
 - `arduino/mezamashi_tag/mezamashi_tag.ino` を参照してください（サンプルコードを含む）。

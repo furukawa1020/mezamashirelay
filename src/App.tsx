@@ -6,7 +6,7 @@ import { useAuth } from './services/auth'
 export default function App(){
   const { user, loading } = useAuth()
 
-  if(loading) return <div>読み込み中…</div>
+  if(loading) return <div style={{display:'flex',height:'100vh',alignItems:'center',justifyContent:'center'}}><div className="small muted">読み込み中…</div></div>
   if(!user) return <Login />
   return <Dashboard />
 }
