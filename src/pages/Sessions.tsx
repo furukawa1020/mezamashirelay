@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import usePageMeta from '../hooks/usePageMeta'
 import { useAuth } from '../services/auth'
 import { listTodaySessionsByUser, listSessionSteps, completeSessionStep } from '../services/firestore'
 import { playSuccess } from '../services/soundProvider'
@@ -6,6 +7,7 @@ import { useSound } from '../services/soundProvider'
 import { useToast } from '../components/Toast'
 
 export default function Sessions(){
+  usePageMeta('セッション','今日のセッションとステップを確認・操作します')
   const { user } = useAuth()
   const [sessions, setSessions] = useState<any[]>([])
   const [stepsMap, setStepsMap] = useState<Record<string, any[]>>({})

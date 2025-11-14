@@ -1,10 +1,12 @@
 import React, { useState } from 'react'
+import usePageMeta from '../hooks/usePageMeta'
 import { useAuth } from '../services/auth'
 import { createGroup, joinGroup, listGroupMembers, getGroup, listTodaySessionsByGroup, getGroupDailyStatus } from '../services/firestore'
 
 type Member = { id:string; user_id:string }
 
 export default function Groups(){
+  usePageMeta('グループ','グループを作成・参加して一緒に起きよう')
   const { user } = useAuth()
   const [name, setName] = useState('')
   const [mode, setMode] = useState<'RACE'|'ALL'>('RACE')

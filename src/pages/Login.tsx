@@ -1,7 +1,9 @@
 import React, { useState } from 'react'
+import usePageMeta from '../hooks/usePageMeta'
 import { useAuth } from '../services/auth'
 
 export default function Login(){
+  usePageMeta('ログイン','めざましリレーにログインして、セッションを開始しましょう')
   const { login, register, loginWithGoogle } = useAuth()
   const [email,setEmail] = useState('')
   const [password,setPassword] = useState('')
