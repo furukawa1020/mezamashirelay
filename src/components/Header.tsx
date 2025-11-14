@@ -1,18 +1,22 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useAuth } from '../services/auth'
 import { useLocalAuth } from '../services/localAuth'
 import IconButton from './IconButton'
 import { useSound } from '../services/soundProvider'
+import NameModal from './NameModal'
+import { useToast } from './Toast'
 
 // Accessible header with sound toggle
 export default function Header(){
   const auth = useAuth?.()
   const local = useLocalAuth?.()
   const { muted, setMuted } = useSound()
+  const { showToast } = useToast()
 
   const user = auth?.user || local?.user
   const signOut = auth?.signOut || local?.signOut
   const isLocal = !!local?.isLocal
+  const [openName, setOpenName] = useState(false)
 
   const onKey = (e:React.KeyboardEvent)=>{
     if(e.key === 'Enter' || e.key === ' '){
@@ -52,14 +56,16 @@ export default function Header(){
           )}
         </IconButton>
         {isLocal && (
-          <button className="button" style={{padding:'8px 10px',borderRadius:10}} onClick={async ()=>{
-            try{
-              const name = window.prompt('表示名を入力してください', user?.name || user?.displayName || '')
-              if(name && name.trim()){
-                await local.setName(name.trim())
-              }
-            }catch(e){ }
-          }} aria-label="表示名を編集">名前編集</button>
+          <>
+            <button className="button" style={{padding:'8px 10px',borderRadius:10}} onClick={()=>setOpenName(true)} aria-label="表示名を編集">名前編集</button>
+            <NameModal open={openName} initial={user?.name || user?.displayName || ''} onClose={()=>setOpenName(false)} onSave={async (name)=>{
+              try{
+                await local.setName(name)
+                showToast('表示名を保存しました')
+              }catch(e){ }
+              setOpenName(false)
+            }} />
+          </>
         )}
         <button className="button" style={{padding:'8px 10px',borderRadius:10}} onClick={signOut}>サインアウト</button>
       </div>
