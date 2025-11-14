@@ -12,6 +12,10 @@ export default function StepItem({step, onComplete}:{step:any; onComplete:(id:st
     if(!prevRef.current || prevRef.current !== 'success'){
       if(nowDone && !done){
         setShowConfetti(true)
+        // haptic feedback on supported devices
+        try{ if('vibrate' in navigator) (navigator as any).vibrate([30,20,30]) }catch(e){}
+        // hide confetti after a short delay
+        setTimeout(()=> setShowConfetti(false), 900)
       }
     }
     prevRef.current = step.result

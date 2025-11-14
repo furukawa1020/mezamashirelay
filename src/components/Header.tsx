@@ -32,7 +32,7 @@ export default function Header(){
 
       <div style={{display:'flex',alignItems:'center',gap:8}}>
         <div className="small muted" aria-live="polite">{user?.displayName || user?.email}</div>
-        <IconButton ariaLabel={muted ? '音をオン' : '音をオフ'} onClick={()=>setMuted(!muted)}>
+  <IconButton ariaLabel={muted ? '音をオン' : '音をオフ'} onClick={()=>setMuted(!muted)} role="switch" ariaChecked={!muted}>
           {muted ? (
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
               <path d="M16 7L7 16" stroke="#666" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>

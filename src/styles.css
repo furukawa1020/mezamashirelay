@@ -33,4 +33,10 @@ body{margin:0;padding:24px;background:var(--bg);color:var(--text);-webkit-font-s
 	100%{transform:scale(1);opacity:1}
 }
 
+/* Icon button focus style */
+.icon-button:focus{outline:none;box-shadow:0 0 0 4px rgba(0,122,255,0.14);border-radius:10px}
+
+/* Button focus for keyboard users */
+.button:focus{outline:none;box-shadow:0 0 0 4px rgba(0,122,255,0.12);border-radius:12px}
+
 
