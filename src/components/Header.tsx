@@ -6,6 +6,7 @@ import { useSound } from '../services/soundProvider'
 import NameModal from './NameModal'
 import { useToast } from './Toast'
 import OfflineIndicator from './OfflineIndicator'
+import InstallPrompt from './InstallPrompt'
 
 // Accessible header with sound toggle
 export default function Header(){
@@ -27,6 +28,7 @@ export default function Header(){
   }
 
   return (
+    <>
     <header style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:12,marginBottom:18}}>
       <div style={{display:'flex',alignItems:'center',gap:12}}>
         <div style={{width:44,height:44,display:'flex',alignItems:'center',justifyContent:'center',borderRadius:10,background:'linear-gradient(180deg,#fff,#f1f6ff)',boxShadow:'0 6px 18px rgba(10,10,10,0.06)'}}>
@@ -74,5 +76,8 @@ export default function Header(){
         <button className="button" style={{padding:'8px 10px',borderRadius:10}} onClick={signOut}>サインアウト</button>
       </div>
     </header>
+    {/* show install prompt at app-level */}
+    <InstallPrompt />
+    </>
   )
 }

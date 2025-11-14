@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import usePageMeta from '../hooks/usePageMeta'
 import { useAuth } from '../services/auth'
 import { createGroup, joinGroup, listGroupMembers, getGroup, listTodaySessionsByGroup, getGroupDailyStatus } from '../services/firestore'
+import Skeleton from '../components/Skeleton'
 
 type Member = { id:string; user_id:string }
 
@@ -34,18 +35,22 @@ export default function Groups(){
   const [members, setMembers] = useState<Member[]>([])
   const [todaySessions, setTodaySessions] = useState<any[]>([])
   const [dailyStatus, setDailyStatus] = useState<any>(null)
+  const [loading, setLoading] = useState<boolean>(false)
 
   const loadGroup = async (gid?:string)=>{
     const id = gid || prompt('読み込むグループIDを入力')
     if(!id) return
-    const g = await getGroup(id)
-    setLoadedGroup(g)
-    const m = await listGroupMembers(id)
-    setMembers(m)
-    const s = await listTodaySessionsByGroup(id)
-    setTodaySessions(s)
-    const ds = await getGroupDailyStatus(id)
-    setDailyStatus(ds)
+    try{
+      setLoading(true)
+      const g = await getGroup(id)
+      setLoadedGroup(g)
+      const m = await listGroupMembers(id)
+      setMembers(m)
+      const s = await listTodaySessionsByGroup(id)
+      setTodaySessions(s)
+      const ds = await getGroupDailyStatus(id)
+      setDailyStatus(ds)
+    }finally{ setLoading(false) }
   }
 
   return (
@@ -80,15 +85,15 @@ export default function Groups(){
           <div>グループID: {loadedGroup.id}</div>
           <div style={{marginTop:8}}>
             <h4>メンバー ({members.length})</h4>
-            {members.map(m=> <div key={m.id}>{m.user_id}</div>)}
+            {loading ? <Skeleton lines={3} /> : members.map(m=> <div key={m.id}>{m.user_id}</div>)}
           </div>
           <div style={{marginTop:8}}>
             <h4>今日のセッション ({todaySessions.length})</h4>
-            {todaySessions.map(s=> <div key={s.id}>{s.user_id} — {s.status} {s.rank?`(rank:${s.rank})`:''}</div>)}
+            {loading ? <Skeleton lines={2} /> : todaySessions.map(s=> <div key={s.id}>{s.user_id} — {s.status} {s.rank?`(rank:${s.rank})`:''}</div>)}
           </div>
           <div style={{marginTop:8}}>
             <h4>今日のステータス</h4>
-            {dailyStatus ? <div>ALL Cleared: {dailyStatus.all_cleared ? 'はい' : 'いいえ'} / Streak: {dailyStatus.clear_streak}</div> : <div>まだ記録がありません</div>}
+            {loading ? <Skeleton lines={1} /> : (dailyStatus ? <div>ALL Cleared: {dailyStatus.all_cleared ? 'はい' : 'いいえ'} / Streak: {dailyStatus.clear_streak}</div> : <div>まだ記録がありません</div>)}
           </div>
         </div>
       )}
