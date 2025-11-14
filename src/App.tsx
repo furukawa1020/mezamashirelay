@@ -2,7 +2,7 @@ import React from 'react'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import { useAuth } from './services/auth'
-import Header from './components/Header'
+import Header from './components/HeaderWithSound'
 
 export default function App(){
   const { user, loading } = useAuth()

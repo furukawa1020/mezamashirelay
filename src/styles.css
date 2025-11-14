@@ -21,3 +21,16 @@ body{margin:0;padding:24px;background:var(--bg);color:var(--text);-webkit-font-s
 
 .small{font-size:13px}
 
+/* Step item animations */
+.step-item{display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:10px;transition:transform .18s ease,box-shadow .18s ease,opacity .18s ease}
+.step-item .checkmark{width:28px;height:28px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;color:white;background:var(--accent);transform:scale(0);opacity:0}
+.step-item.done{transform:scale(1.02);box-shadow:0 10px 26px rgba(0,0,0,0.08)}
+.step-item.done .checkmark{animation:check-pop .36s cubic-bezier(.2,.9,.2,1) forwards}
+
+@keyframes check-pop{
+	0%{transform:scale(0);opacity:0}
+	60%{transform:scale(1.12);opacity:1}
+	100%{transform:scale(1);opacity:1}
+}
+
+

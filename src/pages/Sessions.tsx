@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useAuth } from '../services/auth'
 import { listTodaySessionsByUser, listSessionSteps, completeSessionStep } from '../services/firestore'
 import { playSuccess } from '../services/sound'
+import { useSound } from '../services/sound'
 
 export default function Sessions(){
   const { user } = useAuth()
@@ -19,6 +20,8 @@ export default function Sessions(){
     }).catch(()=>{})
   },[user])
 
+  const { muted } = useSound()
+
   const onComplete = async (sessionId:string, stepId:string)=>{
     await completeSessionStep(stepId)
     const st = await listSessionSteps(sessionId)
@@ -26,7 +29,7 @@ export default function Sessions(){
     // refresh sessions to reflect possible session completion / rank updates
     const s = await listTodaySessionsByUser(user!.uid)
     setSessions(s)
-    playSuccess()
+    if(!muted) playSuccess()
   }
 
   return (
