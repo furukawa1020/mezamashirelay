@@ -26,12 +26,12 @@ export default function Login(){
         <input className="input" value={email} onChange={e=>setEmail(e.target.value)} />
         <label>パスワード</label>
         <input className="input" type="password" value={password} onChange={e=>setPassword(e.target.value)} />
-        <div style={{marginTop:8}}>
-          <button className="button" onClick={submit}>{mode==='login'?'ログイン':'登録'}</button>
-          <button style={{marginLeft:8}} onClick={()=>setMode(mode==='login'?'register':'login')}>{mode==='login'?'新規登録':'ログイン画面へ'}</button>
+        <div style={{marginTop:8,display:'flex',gap:8}}>
+          <button className="button" style={{flex:1}} onClick={submit}>{mode==='login'?'ログイン':'登録'}</button>
+          <button style={{flex:1,background:'transparent',border:'1px solid rgba(0,0,0,0.06)',borderRadius:10}} onClick={()=>setMode(mode==='login'?'register':'login')}>{mode==='login'?'新規登録':'ログイン画面へ'}</button>
         </div>
         <div style={{marginTop:8}}>
-          <button className="button" onClick={loginWithGoogle}>Googleでログイン</button>
+          <button className="button" style={{width:'100%',background:'linear-gradient(180deg,#fff,#f3f6ff)',color:'#007aff',boxShadow:'none',border:'1px solid #e6eefc'}} onClick={loginWithGoogle}>Googleでログイン</button>
         </div>
         {error && <div style={{color:'crimson',marginTop:8}}>{error}</div>}
       </div>

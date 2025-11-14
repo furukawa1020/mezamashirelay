@@ -26,13 +26,12 @@ export default function Dashboard(){
     <div className="container">
       <h2>ようこそ、{user?.displayName || user?.email}</h2>
 
-      <div style={{display:'flex',gap:8,marginBottom:12}}>
+      <nav style={{display:'flex',gap:12,marginBottom:12,flexWrap:'wrap'}}>
         <button className="button" onClick={()=>setView('home')}>ホーム</button>
         <button className="button" onClick={()=>setView('missions')}>ミッション</button>
         <button className="button" onClick={()=>setView('groups')}>グループ</button>
         <button className="button" onClick={onStart}>今日のセッション開始</button>
-        <button className="button" onClick={signOut}>サインアウト</button>
-      </div>
+      </nav>
 
       {view==='home' && (
         <div className="card">
