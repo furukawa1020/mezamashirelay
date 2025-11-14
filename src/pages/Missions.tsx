@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import { useAuth } from '../services/auth'
 import { createMission, listMissions, createMissionStep, listMissionSteps } from '../services/firestore'
+import usePageMeta from '../hooks/usePageMeta'
 
 export default function Missions(){
+  usePageMeta('ミッション一覧','ミッションを作成・編集して朝のタスクを共有しましょう')
   const { user } = useAuth()
   const [missions, setMissions] = useState<any[]>([])
   const [name, setName] = useState('')

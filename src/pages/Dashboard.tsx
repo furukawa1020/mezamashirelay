@@ -1,10 +1,12 @@
 import React, { useState } from 'react'
+import usePageMeta from '../hooks/usePageMeta'
 import { useAuth } from '../services/auth'
 import Missions from './Missions'
 import Groups from './Groups'
 import { startSession } from '../services/firestore'
 
 export default function Dashboard(){
+  usePageMeta('ダッシュボード','今日のセッションを確認・開始できます')
   const { user, signOut } = useAuth()
   const [view, setView] = useState<'home'|'missions'|'groups'>('home')
 
