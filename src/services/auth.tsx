@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
+import { useLocalAuth } from './localAuth'
 import { initializeApp } from 'firebase/app'
 import {
   getAuth,
@@ -102,5 +103,12 @@ export function AuthProvider({ children }:{children:React.ReactNode}){
 }
 
 export function useAuth(){
-  return useContext(AuthContext)
+  // Prefer Firebase context when provided, otherwise fall back to local auth if available.
+  const ctx = useContext(AuthContext)
+  const local = useLocalAuth()
+
+  // If firebase context looks populated, return it
+  if(ctx && (ctx.user || ctx.login || ctx.sendAccountClaimLink)) return ctx
+  // else return local auth (which provides user, loading, setName, signOut, isLocal)
+  return local || ctx
 }
