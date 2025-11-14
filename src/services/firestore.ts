@@ -120,6 +120,93 @@ export async function listTodaySessionsByGroup(groupId:string){
   return snap.docs.map(d=>({ id:d.id, ...d.data() }))
 }
 
+export async function getGroup(groupId:string){
+  const ref = doc(db,'groups',groupId)
+  const snap = await getDoc(ref)
+  return snap.exists() ? { id:snap.id, ...snap.data() } : null
+}
+
+export async function listGroupMembers(groupId:string){
+  const q = query(collection(db,'group_members'), where('group_id','==',groupId))
+  const snap = await getDocs(q)
+  return snap.docs.map(d=>({ id:d.id, ...d.data() }))
+}
+
+// Finish session and compute group results (RACE/ALL)
+export async function finishSessionAndCompute(sessionId:string){
+  const sref = doc(db,'sessions',sessionId)
+  const sSnap = await getDoc(sref)
+  if(!sSnap.exists()) throw new Error('session not found')
+  const sData:any = sSnap.data()
+  const finishedAt = serverTimestamp()
+
+  await updateDoc(sref, { status:'completed', finished_at: finishedAt })
+
+  const groupId = sData.group_id
+  const date = sData.date
+  if(!groupId) return
+
+  const group = await getGroup(groupId)
+  if(!group) return
+
+  if(group.mode === 'RACE'){
+    // compute rank based on finished_at asc
+    const q = query(collection(db,'sessions'), where('group_id','==',groupId), where('date','==',date), where('status','==','completed'), orderBy('finished_at','asc'))
+    const snap = await getDocs(q)
+    const ids = snap.docs.map(d=>d.id)
+    const rank = ids.indexOf(sessionId) + 1
+    if(rank>0){
+      await updateDoc(sref, { rank })
+    }
+  }
+
+  if(group.mode === 'ALL'){
+    // check whether all members have a completed session today
+    const members = await listGroupMembers(groupId)
+    const memberIds = members.map(m=>m.user_id)
+    const q = query(collection(db,'sessions'), where('group_id','==',groupId), where('date','==',date), where('status','==','completed'))
+    const snap = await getDocs(q)
+    const cleared = snap.docs.map(d=> (d.data() as any).user_id )
+
+    const allCleared = memberIds.every(id=> cleared.includes(id))
+    const gdsRef = doc(db,'group_daily_status', `${groupId}_${date}`)
+    const prevSnap = await getDoc(gdsRef)
+    let streak = 0
+    if(allCleared){
+      if(prevSnap.exists()){
+        const prev = prevSnap.data() as any
+        streak = (prev.clear_streak || 0) + 1
+      }else{
+        streak = 1
+      }
+      await setDoc(gdsRef, {
+        group_id: groupId,
+        date,
+        all_cleared: true,
+        cleared_members: cleared,
+        last_clear_member: sData.user_id || null,
+        clear_streak: streak
+      })
+    }else{
+      await setDoc(gdsRef, {
+        group_id: groupId,
+        date,
+        all_cleared: false,
+        cleared_members: cleared,
+        last_clear_member: sData.user_id || null,
+        clear_streak: 0
+      })
+    }
+  }
+}
+
+export async function getGroupDailyStatus(groupId:string, date?:string){
+  const d = date || new Date().toISOString().slice(0,10)
+  const ref = doc(db,'group_daily_status', `${groupId}_${d}`)
+  const snap = await getDoc(ref)
+  return snap.exists() ? { id:snap.id, ...snap.data() } : null
+}
+
 export { db }
 
 export async function listTodaySessionsByUser(userId:string){
