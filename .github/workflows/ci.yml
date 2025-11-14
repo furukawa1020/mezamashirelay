@@ -20,6 +20,8 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build
+      - name: Smoke test
+        run: npm run smoke
 
   # Optional: Netlify deploy if NETLIFY_AUTH_TOKEN and NETLIFY_SITE_ID are provided
   deploy-netlify:
