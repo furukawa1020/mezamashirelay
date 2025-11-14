@@ -194,4 +194,38 @@ export async function completeSessionStep(sessionStepId:string){
   }
 }
 
+// Export all stored data as a single object
+export function exportAll(){
+  const out:AnyObj = {}
+  for(const k of Object.keys(KEYS)){
+    out[k] = load((KEYS as any)[k])
+  }
+  return out
+}
+
+// Replace store with imported data (careful: overwrites existing)
+export function importAll(data:AnyObj){
+  try{
+    for(const k of Object.keys(KEYS)){
+      const key = (KEYS as any)[k]
+      if(data[k] !== undefined){ save(key, data[k]) }
+    }
+    return true
+  }catch(e){ return false }
+}
+
+// Seed sample data for a user (useful for demos)
+export async function seedSampleData(userId:string){
+  // create a sample mission with 3 steps
+  const missionId = await createMission(userId, { name: '朝のストレッチ', wake_time: '07:00' })
+  await createMissionStep(missionId, { label: 'ベッドから出る', order: 0 })
+  await createMissionStep(missionId, { label: '顔を洗う', order: 1 })
+  await createMissionStep(missionId, { label: '深呼吸して完了', order: 2 })
+
+  // sample group
+  const groupId = await createGroup(userId, 'テストグループ', 'ALL')
+  await joinGroup(userId, groupId)
+  return { missionId, groupId }
+}
+
 export { }
