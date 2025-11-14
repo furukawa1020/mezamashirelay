@@ -8,7 +8,7 @@ const USE_FIREBASE = import.meta.env.VITE_USE_FIREBASE === '1'
 // Otherwise export the localStore functions as a drop-in replacement.
 
 // Firebase-backed implementations
-let db: any = null
+let firebaseDb: any = null
 
 async function createMissionFirebase(userId: string, data: { name: string; wake_time: string; repeat_rule?: string }){
   const firebaseConfig = {
@@ -19,8 +19,8 @@ async function createMissionFirebase(userId: string, data: { name: string; wake_
     appId: import.meta.env.VITE_FIREBASE_APP_ID || undefined
   }
   const app = initializeApp(firebaseConfig)
-  db = getFirestore(app)
-  const col = collection(db, 'missions')
+  firebaseDb = getFirestore(app)
+  const col = collection(firebaseDb, 'missions')
   const docRef = await addDoc(col, {
     user_id: userId,
     name: data.name,
@@ -32,13 +32,13 @@ async function createMissionFirebase(userId: string, data: { name: string; wake_
 }
 
 async function listMissionsFirebase(userId:string){
-  const q = query(collection(db,'missions'), where('user_id','==',userId), orderBy('created_at','desc'))
+  const q = query(collection(firebaseDb,'missions'), where('user_id','==',userId), orderBy('created_at','desc'))
   const snap = await getDocs(q)
   return snap.docs.map(d=>({ id:d.id, ...d.data() }))
 }
 
 async function createMissionStepFirebase(missionId:string, data:any){
-  const col = collection(db,'mission_steps')
+  const col = collection(firebaseDb,'mission_steps')
   const docRef = await addDoc(col, {
     mission_id: missionId,
     label: data.label,
@@ -57,49 +57,49 @@ async function listMissionStepsFirebase(missionId:string){
 }
 
 async function createGroupFirebase(userId:string, name:string, mode:'RACE'|'ALL'){
-  const col = collection(db,'groups')
+  const col = collection(firebaseDb,'groups')
   const docRef = await addDoc(col, { name, mode, owner_id: userId, created_at: serverTimestamp() })
-  await setDoc(doc(db,'group_members', `${docRef.id}_${userId}`), { group_id: docRef.id, user_id: userId, joined_at: serverTimestamp() })
+  await setDoc(doc(firebaseDb,'group_members', `${docRef.id}_${userId}`), { group_id: docRef.id, user_id: userId, joined_at: serverTimestamp() })
   return docRef.id
 }
 
 async function joinGroupFirebase(userId:string, groupId:string){
-  await setDoc(doc(db,'group_members', `${groupId}_${userId}`), { group_id: groupId, user_id: userId, joined_at: serverTimestamp() })
+  await setDoc(doc(firebaseDb,'group_members', `${groupId}_${userId}`), { group_id: groupId, user_id: userId, joined_at: serverTimestamp() })
 }
 
 async function startSessionFirebase(userId:string, missionId:string, groupId?:string){
-  const col = collection(db,'sessions')
+  const col = collection(firebaseDb,'sessions')
   const docRef = await addDoc(col, { user_id: userId, group_id: groupId||null, mission_id: missionId, date: new Date().toISOString().slice(0,10), status: 'in_progress', started_at: serverTimestamp() })
   const sessionId = docRef.id
   try{
     const ms = await listMissionStepsFirebase(missionId)
     for(const m of ms){
-      await addDoc(collection(db,'session_steps'), { session_id: sessionId, mission_step_id: m.id, label: (m as any).label||'', started_at: serverTimestamp(), finished_at: null, result: 'not_started', lap_ms: null, order: (m as any).order||0 })
+      await addDoc(collection(firebaseDb,'session_steps'), { session_id: sessionId, mission_step_id: m.id, label: (m as any).label||'', started_at: serverTimestamp(), finished_at: null, result: 'not_started', lap_ms: null, order: (m as any).order||0 })
     }
   }catch(e){}
   return sessionId
 }
 
 async function finishSessionFirebase(sessionId:string, finishedAt?:any){
-  const ref = doc(db,'sessions',sessionId)
+  const ref = doc(firebaseDb,'sessions',sessionId)
   await updateDoc(ref, { status:'completed', finished_at: finishedAt || serverTimestamp() })
 }
 
 async function listTodaySessionsByGroupFirebase(groupId:string){
   const today = new Date().toISOString().slice(0,10)
-  const q = query(collection(db,'sessions'), where('group_id','==',groupId), where('date','==',today))
+  const q = query(collection(firebaseDb,'sessions'), where('group_id','==',groupId), where('date','==',today))
   const snap = await getDocs(q)
   return snap.docs.map(d=>({ id:d.id, ...d.data() }))
 }
 
 async function getGroupFirebase(groupId:string){
-  const ref = doc(db,'groups',groupId)
+  const ref = doc(firebaseDb,'groups',groupId)
   const snap = await getDoc(ref)
   return snap.exists() ? { id:snap.id, ...snap.data() } : null
 }
 
 async function listGroupMembersFirebase(groupId:string){
-  const q = query(collection(db,'group_members'), where('group_id','==',groupId))
+  const q = query(collection(firebaseDb,'group_members'), where('group_id','==',groupId))
   const snap = await getDocs(q)
   return snap.docs.map(d=>({ id:d.id, ...d.data() }))
 }
@@ -117,8 +117,8 @@ async function finishSessionAndComputeFirebase(sessionId:string){
   const group = await getGroupFirebase(groupId)
   if(!group) return
   if((group as any).mode === 'RACE'){
-    const q = query(collection(db,'sessions'), where('group_id','==',groupId), where('date','==',date), where('status','==','completed'), orderBy('finished_at','asc'))
-    const snap = await getDocs(q)
+  const q = query(collection(firebaseDb,'sessions'), where('group_id','==',groupId), where('date','==',date), where('status','==','completed'), orderBy('finished_at','asc'))
+  const snap = await getDocs(q)
     const ids = snap.docs.map(d=>d.id)
     const rank = ids.indexOf(sessionId) + 1
     if(rank>0){ await updateDoc(sref, { rank }) }
@@ -126,12 +126,12 @@ async function finishSessionAndComputeFirebase(sessionId:string){
   if((group as any).mode === 'ALL'){
     const members = await listGroupMembersFirebase(groupId)
     const memberIds = members.map((m:any)=>m.user_id)
-    const q = query(collection(db,'sessions'), where('group_id','==',groupId), where('date','==',date), where('status','==','completed'))
-    const snap = await getDocs(q)
+  const q = query(collection(firebaseDb,'sessions'), where('group_id','==',groupId), where('date','==',date), where('status','==','completed'))
+  const snap = await getDocs(q)
     const cleared = snap.docs.map(d=> (d.data() as any).user_id )
     const allCleared = memberIds.every(id=> cleared.includes(id))
-    const gdsRef = doc(db,'group_daily_status', `${groupId}_${date}`)
-    const prevSnap = await getDoc(gdsRef)
+  const gdsRef = doc(firebaseDb,'group_daily_status', `${groupId}_${date}`)
+  const prevSnap = await getDoc(gdsRef)
     let streak = 0
     if(allCleared){
       if(prevSnap.exists()){ const prev = prevSnap.data() as any; streak = (prev.clear_streak || 0) + 1 } else { streak = 1 }
@@ -144,26 +144,26 @@ async function finishSessionAndComputeFirebase(sessionId:string){
 
 async function getGroupDailyStatusFirebase(groupId:string, date?:string){
   const d = date || new Date().toISOString().slice(0,10)
-  const ref = doc(db,'group_daily_status', `${groupId}_${d}`)
+  const ref = doc(firebaseDb,'group_daily_status', `${groupId}_${d}`)
   const snap = await getDoc(ref)
   return snap.exists() ? { id:snap.id, ...snap.data() } : null
 }
 
 async function listTodaySessionsByUserFirebase(userId:string){
   const today = new Date().toISOString().slice(0,10)
-  const q = query(collection(db,'sessions'), where('user_id','==',userId), where('date','==',today))
+  const q = query(collection(firebaseDb,'sessions'), where('user_id','==',userId), where('date','==',today))
   const snap = await getDocs(q)
   return snap.docs.map(d=>({ id:d.id, ...d.data() }))
 }
 
 async function listSessionStepsFirebase(sessionId:string){
-  const q = query(collection(db,'session_steps'), where('session_id','==',sessionId), orderBy('order','asc'))
+  const q = query(collection(firebaseDb,'session_steps'), where('session_id','==',sessionId), orderBy('order','asc'))
   const snap = await getDocs(q)
   return snap.docs.map(d=>({ id:d.id, ...d.data() }))
 }
 
 async function completeSessionStepFirebase(sessionStepId:string){
-  const ref = doc(db,'session_steps',sessionStepId)
+  const ref = doc(firebaseDb,'session_steps',sessionStepId)
   await updateDoc(ref, { finished_at: serverTimestamp(), result: 'success' })
   const snap = await getDoc(ref)
   if(!snap.exists()) return
