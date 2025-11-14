@@ -3,11 +3,14 @@ import { createRoot } from 'react-dom/client'
 import App from './App'
 import './styles.css'
 import { AuthProvider } from './services/auth'
+import { SoundProvider } from './services/soundProvider'
 
 createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <AuthProvider>
-      <App />
+      <SoundProvider>
+        <App />
+      </SoundProvider>
     </AuthProvider>
   </React.StrictMode>
 )

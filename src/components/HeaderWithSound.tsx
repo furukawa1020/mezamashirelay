@@ -1,7 +1,7 @@
 import React from 'react'
 import { useAuth } from '../services/auth'
 import IconButton from './IconButton'
-import { useSound } from '../services/sound'
+import { useSound } from '../services/soundProvider'
 
 export default function HeaderWithSound(){
   const { user, signOut } = useAuth()
