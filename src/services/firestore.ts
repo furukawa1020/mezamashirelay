@@ -193,5 +193,5 @@ export const listTodaySessionsByUser = USE_FIREBASE ? listTodaySessionsByUserFir
 export const listSessionSteps = USE_FIREBASE ? listSessionStepsFirebase : local.listSessionSteps
 export const completeSessionStep = USE_FIREBASE ? completeSessionStepFirebase : local.completeSessionStep
 
-export const db = USE_FIREBASE ? db : null
+export const db = USE_FIREBASE ? firebaseDb : null
 
