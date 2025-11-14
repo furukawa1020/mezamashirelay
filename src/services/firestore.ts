@@ -1,11 +1,13 @@
 import { initializeApp } from 'firebase/app'
 import { getFirestore, collection, addDoc, doc, setDoc, getDocs, query, where, orderBy, updateDoc, serverTimestamp, getDoc } from 'firebase/firestore'
 
-// 同じ Firebase コンフィグを使う（auth と合わせてください）
+// Use Vite env variables (VITE_FIREBASE_*) for deployment-safe config
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'YOUR_API_KEY',
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'YOUR_AUTH_DOMAIN',
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'YOUR_PROJECT_ID',
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || undefined,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || undefined
 }
 
 const app = initializeApp(firebaseConfig)
