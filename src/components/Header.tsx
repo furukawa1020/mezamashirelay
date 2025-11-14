@@ -1,12 +1,18 @@
 import React from 'react'
 import { useAuth } from '../services/auth'
+import { useLocalAuth } from '../services/localAuth'
 import IconButton from './IconButton'
 import { useSound } from '../services/soundProvider'
 
 // Accessible header with sound toggle
 export default function Header(){
-  const { user, signOut } = useAuth()
+  const auth = useAuth?.()
+  const local = useLocalAuth?.()
   const { muted, setMuted } = useSound()
+
+  const user = auth?.user || local?.user
+  const signOut = auth?.signOut || local?.signOut
+  const isLocal = !!local?.isLocal
 
   const onKey = (e:React.KeyboardEvent)=>{
     if(e.key === 'Enter' || e.key === ' '){
@@ -30,8 +36,8 @@ export default function Header(){
         </div>
       </div>
 
-      <div style={{display:'flex',alignItems:'center',gap:8}}>
-        <div className="small muted" aria-live="polite">{user?.displayName || user?.email}</div>
+  <div style={{display:'flex',alignItems:'center',gap:8}}>
+    <div className="small muted" aria-live="polite">{user?.displayName || user?.name || user?.email}</div>
   <IconButton ariaLabel={muted ? '音をオン' : '音をオフ'} onClick={()=>setMuted(!muted)} role="switch" ariaChecked={!muted}>
           {muted ? (
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
@@ -45,6 +51,16 @@ export default function Header(){
             </svg>
           )}
         </IconButton>
+        {isLocal && (
+          <button className="button" style={{padding:'8px 10px',borderRadius:10}} onClick={async ()=>{
+            try{
+              const name = window.prompt('表示名を入力してください', user?.name || user?.displayName || '')
+              if(name && name.trim()){
+                await local.setName(name.trim())
+              }
+            }catch(e){ }
+          }} aria-label="表示名を編集">名前編集</button>
+        )}
         <button className="button" style={{padding:'8px 10px',borderRadius:10}} onClick={signOut}>サインアウト</button>
       </div>
     </header>
