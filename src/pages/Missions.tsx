@@ -2,17 +2,20 @@ import React, { useEffect, useState } from 'react'
 import { useAuth } from '../services/auth'
 import { createMission, listMissions, createMissionStep, listMissionSteps } from '../services/firestore'
 import usePageMeta from '../hooks/usePageMeta'
+import Skeleton from '../components/Skeleton'
 
 export default function Missions(){
   usePageMeta('ミッション一覧','ミッションを作成・編集して朝のタスクを共有しましょう')
   const { user } = useAuth()
   const [missions, setMissions] = useState<any[]>([])
+  const [loading, setLoading] = useState<boolean>(true)
   const [name, setName] = useState('')
   const [wakeTime, setWakeTime] = useState('07:00')
 
   useEffect(()=>{
     if(!user) return
-    listMissions(user.uid).then(setMissions).catch(()=>{})
+    setLoading(true)
+    listMissions(user.uid).then(setMissions).catch(()=>{}).finally(()=>setLoading(false))
   },[user])
 
   const loadSteps = async (missionId:string)=>{
@@ -50,21 +53,26 @@ export default function Missions(){
 
       <div className="card">
         <h3>あなたのミッション一覧</h3>
-        {missions.length===0 && <div>まだミッションがありません</div>}
-        {missions.map(m=> (
-          <div key={m.id} style={{padding:8,borderBottom:'1px solid #eee'}}>
-            <div style={{display:'flex',justifyContent:'space-between'}}>
-              <strong>{m.name}</strong>
-              <div><button className="button" onClick={()=>addStep(m.id)}>ステップ追加</button></div>
+        {loading ? (
+          <div style={{padding:8}}><Skeleton lines={4} /></div>
+        ) : missions.length===0 ? (
+          <div>まだミッションがありません</div>
+        ) : (
+          missions.map(m=> (
+            <div key={m.id} style={{padding:8,borderBottom:'1px solid #eee'}}>
+              <div style={{display:'flex',justifyContent:'space-between'}}>
+                <strong>{m.name}</strong>
+                <div><button className="button" onClick={()=>addStep(m.id)}>ステップ追加</button></div>
+              </div>
+              <div style={{fontSize:12,color:'#666'}}>起床時間: {m.wake_time}</div>
+              <div style={{marginTop:8}}>
+                {(m.steps || []).map((s:any)=> (
+                  <div key={s.id} style={{padding:6,borderTop:'1px solid #f0f0f0'}}>{s.order}. {s.label} <span style={{fontSize:12,color:'#666'}}>({s.type})</span></div>
+                ))}
+              </div>
             </div>
-            <div style={{fontSize:12,color:'#666'}}>起床時間: {m.wake_time}</div>
-            <div style={{marginTop:8}}>
-              {(m.steps || []).map((s:any)=> (
-                <div key={s.id} style={{padding:6,borderTop:'1px solid #f0f0f0'}}>{s.order}. {s.label} <span style={{fontSize:12,color:'#666'}}>({s.type})</span></div>
-              ))}
-            </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   )

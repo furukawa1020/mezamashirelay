@@ -5,6 +5,7 @@ import IconButton from './IconButton'
 import { useSound } from '../services/soundProvider'
 import NameModal from './NameModal'
 import { useToast } from './Toast'
+import OfflineIndicator from './OfflineIndicator'
 
 // Accessible header with sound toggle
 export default function Header(){
@@ -35,7 +36,10 @@ export default function Header(){
           </svg>
         </div>
         <div>
-          <div style={{fontWeight:700,fontSize:18}}>めざましリレー</div>
+          <div style={{display:'flex',alignItems:'center',gap:8}}>
+            <div style={{fontWeight:700,fontSize:18}}>めざましリレー</div>
+            <OfflineIndicator />
+          </div>
           <div className="sub">みんなでひとりで起きる</div>
         </div>
       </div>

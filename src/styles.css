@@ -24,6 +24,21 @@ body{margin:0;padding:24px;background:var(--bg);color:var(--text);-webkit-font-s
 
 .small{font-size:13px}
 
+/* Online/offline badges */
+.online-badge{background:#e9f7ff;color:var(--accent);padding:6px 8px;border-radius:999px;border:1px solid rgba(0,122,255,0.08);font-weight:600}
+.offline-badge{background:#fff6f6;color:#ff3b30;padding:6px 8px;border-radius:999px;border:1px solid rgba(255,59,48,0.08);font-weight:600}
+
+/* Skeleton styles */
+.skeleton-row{display:flex;align-items:center}
+.skeleton-avatar{width:40px;height:40px;border-radius:8px;background:linear-gradient(90deg,#f3f3f4,#eeeeef,#f3f3f4);background-size:200% 100%;animation:shimmer 1.2s linear infinite}
+.skeleton-line{height:12px;border-radius:6px;background:linear-gradient(90deg,#f3f3f4,#eeeeef,#f3f3f4);background-size:200% 100%;animation:shimmer 1.2s linear infinite}
+.skeleton-line.short{width:40%}
+
+@keyframes shimmer{
+	0%{background-position:200% 0}
+	100%{background-position:-200% 0}
+}
+
 /* Step item animations */
 .step-item{display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:10px;transition:transform .18s ease,box-shadow .18s ease,opacity .18s ease}
 .step-item .checkmark{width:28px;height:28px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;color:white;background:var(--accent);transform:scale(0);opacity:0}

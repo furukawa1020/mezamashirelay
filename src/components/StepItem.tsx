@@ -1,10 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react'
 import Confetti from './Confetti'
+import { useSound, playSuccess } from '../services/soundProvider'
 
 export default function StepItem({step, onComplete}:{step:any; onComplete:(id:string)=>void}){
   const [done,setDone] = useState(step.result === 'success')
   const [showConfetti,setShowConfetti] = useState(false)
   const prevRef = useRef(step.result)
+  const { muted } = useSound()
 
   useEffect(()=>{
     const nowDone = step.result === 'success'
@@ -12,6 +14,8 @@ export default function StepItem({step, onComplete}:{step:any; onComplete:(id:st
     if(!prevRef.current || prevRef.current !== 'success'){
       if(nowDone && !done){
         setShowConfetti(true)
+  // sound feedback if enabled
+  try{ if(!muted) playSuccess() }catch(e){}
         // haptic feedback on supported devices
         try{ if('vibrate' in navigator) (navigator as any).vibrate([30,20,30]) }catch(e){}
         // hide confetti after a short delay
