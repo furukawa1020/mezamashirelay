@@ -12,6 +12,9 @@ html,body,#root{height:100%}
 body{margin:0;padding:24px;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
 .container{max-width:840px;margin:0 auto}
 .button{background:linear-gradient(180deg,var(--accent),#005de6);color:white;border:none;padding:10px 14px;border-radius:12px;box-shadow:var(--shadow);font-weight:600}
+.button{transition:transform .12s cubic-bezier(.2,.9,.2,1),box-shadow .12s ease}
+.button:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(10,10,10,0.08)}
+.button:active{transform:translateY(0) scale(.99)}
 .input{padding:10px;border:1px solid #e6e8eb;border-radius:10px;width:100%;background:linear-gradient(180deg,#fff,#fbfbff)}
 .card{background:var(--surface);padding:16px;border-radius:14px;box-shadow:var(--shadow);margin-bottom:16px}
 .title{font-size:20px;font-weight:600;margin-bottom:8px}
@@ -38,5 +41,11 @@ body{margin:0;padding:24px;background:var(--bg);color:var(--text);-webkit-font-s
 
 /* Button focus for keyboard users */
 .button:focus{outline:none;box-shadow:0 0 0 4px rgba(0,122,255,0.12);border-radius:12px}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce){
+	.button, .step-item, .icon-button, .card { transition: none !important; animation: none !important }
+	.step-item.done .checkmark{animation:none}
+}
 
 

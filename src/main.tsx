@@ -4,12 +4,15 @@ import App from './App'
 import './styles.css'
 import { AuthProvider } from './services/auth'
 import { SoundProvider } from './services/soundProvider'
+import ToastProvider from './components/Toast'
 
 createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <AuthProvider>
       <SoundProvider>
-        <App />
+        <ToastProvider>
+          <App />
+        </ToastProvider>
       </SoundProvider>
     </AuthProvider>
   </React.StrictMode>

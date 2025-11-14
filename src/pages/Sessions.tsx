@@ -3,6 +3,7 @@ import { useAuth } from '../services/auth'
 import { listTodaySessionsByUser, listSessionSteps, completeSessionStep } from '../services/firestore'
 import { playSuccess } from '../services/soundProvider'
 import { useSound } from '../services/soundProvider'
+import { useToast } from '../components/Toast'
 
 export default function Sessions(){
   const { user } = useAuth()
@@ -21,6 +22,7 @@ export default function Sessions(){
   },[user])
 
   const { muted } = useSound()
+  const { showToast } = useToast()
 
   const onComplete = async (sessionId:string, stepId:string)=>{
     await completeSessionStep(stepId)
@@ -30,6 +32,8 @@ export default function Sessions(){
     const s = await listTodaySessionsByUser(user!.uid)
     setSessions(s)
     if(!muted) playSuccess()
+    // show toast feedback
+    try{ showToast && showToast('ステップを完了しました') }catch(e){}
   }
 
   return (
