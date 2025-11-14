@@ -1,4 +1,3 @@
-// Simple WebAudio-based sound helper for micro-interactions
 import React, { createContext, useContext, useState } from 'react'
 
 type SoundContextValue = { muted:boolean; setMuted:(v:boolean)=>void }
@@ -6,7 +5,7 @@ const SoundContext = createContext<SoundContextValue>({ muted:false, setMuted:()
 
 export function SoundProvider({children}:{children:React.ReactNode}){
   const [muted, setMuted] = useState(false)
-  return <SoundContext.Provider value={{muted, setMuted}}>{children}</SoundContext.Provider>
+  return (<SoundContext.Provider value={{muted, setMuted}}>{children}</SoundContext.Provider>)
 }
 
 export function useSound(){
@@ -36,13 +35,5 @@ function playTone(type:'click'|'success'){
   }catch(e){ }
 }
 
-export function playClick(){
-  const ctx = (typeof window !== 'undefined' && (window as any).AudioContext) ? true : true
-  const sc = SoundContext as any
-  // We cannot access context here; callers should check useSound() before calling if needed.
-  playTone('click')
-}
-
-export function playSuccess(){
-  playTone('success')
-}
+export function playClick(){ playTone('click') }
+export function playSuccess(){ playTone('success') }
