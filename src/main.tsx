@@ -9,15 +9,8 @@ import ToastProvider from './components/Toast'
 
 createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    {(import.meta.env.VITE_FORCE_LOCAL === '1') ? (
-      <LocalAuthProvider>
-        <SoundProvider>
-          <ToastProvider>
-            <App />
-          </ToastProvider>
-        </SoundProvider>
-      </LocalAuthProvider>
-    ) : (
+    {(import.meta.env.VITE_USE_FIREBASE === '1') ? (
+      // Explicit opt-in to Firebase when VITE_USE_FIREBASE=1
       <AuthProvider>
         <SoundProvider>
           <ToastProvider>
@@ -25,6 +18,15 @@ createRoot(document.getElementById('root')!).render(
           </ToastProvider>
         </SoundProvider>
       </AuthProvider>
+    ) : (
+      // Default: local-first mode
+      <LocalAuthProvider>
+        <SoundProvider>
+          <ToastProvider>
+            <App />
+          </ToastProvider>
+        </SoundProvider>
+      </LocalAuthProvider>
     )}
   </React.StrictMode>
 )

@@ -75,10 +75,11 @@ BLE タグ (ESP32C3 + MPU6050)
 - グループ機能（招待リンク／コード）を実装
 - Web Bluetooth / Web NFC のフックを実装
 
-ローカルファースト (local-first) モード
+ローカルファースト (local-first) モード (デフォルト)
 -----------------------------------
 
-このプロジェクトは「ローカルファースト」モードをサポートしています。バックエンド（Firebase）を使わず、端末の `localStorage` にユーザー情報を保存して動作させることができます。主な用途はプロトタイプ配布やオフラインでの簡易デモです。
+
+このプロジェクトはローカルファースト（local-first）をデフォルトの動作にしています — つまり Firebase を使わず端末の `localStorage` のみで動きます。公開配布や簡易デモでの利用を想定しています。
 
 特徴とトレードオフ
 - 初期参加の摩擦がゼロ（メール不要、すぐ開始できる）
@@ -86,19 +87,22 @@ BLE タグ (ESP32C3 + MPU6050)
 - 公開運用や不正対策が必要な場合はサーバー側の導入を推奨します
 
 使い方（ビルド／デプロイ時）
-- 開発モードで有効化（PowerShell）:
+
+デフォルト（local-first）で動きます。Firebase を使いたい場合は明示的に環境変数 `VITE_USE_FIREBASE=1` を設定してください。
+
+- 開発で Firebase を使う（PowerShell）:
 
 ```powershell
-$env:VITE_FORCE_LOCAL = '1'; npm run dev
+$env:VITE_USE_FIREBASE = '1'; npm run dev
 ```
 
-- 本番ビルドで有効化（PowerShell）:
+- 本番ビルドで Firebase を使う（PowerShell）:
 
 ```powershell
-$env:VITE_FORCE_LOCAL = '1'; npm run build
+$env:VITE_USE_FIREBASE = '1'; npm run build
 ```
 
-アプリ起動時に `VITE_FORCE_LOCAL=1` を検知して `LocalAuthProvider` が利用されます。ローカルモードでは表示名の編集やサインアウトが可能です（表示名は `localStorage` の `mz_local_user` キーに保存されます）。
+ローカルモードでは表示名の編集やサインアウトが可能です（表示名は `localStorage` の `mz_local_user` キーに保存されます）。
 
 必要に応じて、Netlify 等のホスティングで環境変数を設定することで、デプロイ先ごとに backend / local の切り替えができます。
 
