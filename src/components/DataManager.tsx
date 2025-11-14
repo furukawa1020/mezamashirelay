@@ -1,12 +1,18 @@
-import React, { useRef } from 'react'
+import React, { useRef, useState } from 'react'
 import { useAuth } from '../services/auth'
 import * as local from '../services/localStore'
 import { useToast } from './Toast'
+import ShareModal from './ShareModal'
+import AutoBackup from './AutoBackup'
+import { migrateLocalToCloud } from '../services/migrate'
 
 export default function DataManager(){
   const { user } = useAuth()
   const fileRef = useRef<HTMLInputElement|null>(null)
   const { showToast } = useToast()
+  const [shareOpen, setShareOpen] = useState(false)
+  const [shareData, setShareData] = useState<string>('')
+  const auth = useAuth?.()
 
   const onExport = ()=>{
     try{
@@ -44,6 +50,21 @@ export default function DataManager(){
     }catch(e){ showToast('サンプルデータの作成に失敗しました') }
   }
 
+  const onShare = ()=>{
+    const data = JSON.stringify(local.exportAll())
+    setShareData(data)
+    setShareOpen(true)
+  }
+
+  const onMigrate = async ()=>{
+    if(!(import.meta.env.VITE_USE_FIREBASE === '1')){ showToast('Firebase が有効な場合のみ移行できます'); return }
+    if(!auth?.user){ showToast('ログインが必要です'); return }
+    try{
+      await migrateLocalToCloud(auth.user.uid)
+      showToast('ローカルデータをクラウドに移行しました')
+    }catch(e){ showToast('移行に失敗しました') }
+  }
+
   return (
     <div style={{marginTop:12}} className="card">
       <h4>データ管理（ローカルモード向け）</h4>
@@ -52,8 +73,12 @@ export default function DataManager(){
         <button className="button" onClick={onImportClick}>インポート (JSON)</button>
         <input ref={fileRef} type="file" accept="application/json" style={{display:'none'}} onChange={onFile} />
         <button className="button" onClick={onSeed}>サンプルデータ投入</button>
+        <button className="button" onClick={onShare}>QRで共有/表示</button>
+        <button className="button" onClick={onMigrate}>ローカル→クラウドに移行</button>
       </div>
       <small className="muted">※ この操作は localStorage を直接変更します。バックアップをとってください。</small>
+      <ShareModal open={shareOpen} data={shareData} onClose={()=>setShareOpen(false)} />
+      <AutoBackup />
     </div>
   )
 }

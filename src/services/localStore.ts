@@ -228,4 +228,21 @@ export async function seedSampleData(userId:string){
   return { missionId, groupId }
 }
 
+// Backup helpers
+export function saveBackup(){
+  try{
+    const snap = exportAll()
+    const key = 'mz_backup_latest'
+    localStorage.setItem(key, JSON.stringify({created_at: Date.now(), snap}))
+    return true
+  }catch(e){ return false }
+}
+
+export function getLatestBackup(){
+  try{
+    const raw = localStorage.getItem('mz_backup_latest')
+    return raw ? JSON.parse(raw) : null
+  }catch(e){ return null }
+}
+
 export { }
