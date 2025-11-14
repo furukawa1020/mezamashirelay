@@ -22,6 +22,9 @@ export default function Sessions(){
     await completeSessionStep(stepId)
     const st = await listSessionSteps(sessionId)
     setStepsMap(prev=>({ ...prev, [sessionId]: st }))
+    // refresh sessions to reflect possible session completion / rank updates
+    const s = await listTodaySessionsByUser(user!.uid)
+    setSessions(s)
   }
 
   return (

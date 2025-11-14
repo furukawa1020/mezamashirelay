@@ -225,4 +225,23 @@ export async function listSessionSteps(sessionId:string){
 export async function completeSessionStep(sessionStepId:string){
   const ref = doc(db,'session_steps',sessionStepId)
   await updateDoc(ref, { finished_at: serverTimestamp(), result: 'success' })
+
+  // After marking this step success, check if all steps for the session are completed.
+  const snap = await getDoc(ref)
+  if(!snap.exists()) return
+  const sdata:any = snap.data()
+  const sessionId = sdata.session_id
+  if(!sessionId) return
+
+  // find any remaining not-success steps
+  const q = query(collection(db,'session_steps'), where('session_id','==',sessionId), where('result','!=','success'))
+  const rem = await getDocs(q)
+  if(rem.size === 0){
+    // all steps completed -> finish session and compute group results
+    try{
+      await finishSessionAndCompute(sessionId)
+    }catch(e){
+      // ignore compute errors for now
+    }
+  }
 }
