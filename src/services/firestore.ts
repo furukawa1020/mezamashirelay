@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app'
-import { getFirestore, collection, addDoc, doc, setDoc, getDocs, query, where, orderBy, updateDoc, serverTimestamp } from 'firebase/firestore'
+import { getFirestore, collection, addDoc, doc, setDoc, getDocs, query, where, orderBy, updateDoc, serverTimestamp, getDoc } from 'firebase/firestore'
 
 // 同じ Firebase コンフィグを使う（auth と合わせてください）
 const firebaseConfig = {
@@ -26,6 +26,26 @@ export async function createMission(userId: string, data: { name: string; wake_t
 
 export async function listMissions(userId: string){
   const q = query(collection(db,'missions'), where('user_id','==',userId), orderBy('created_at','desc'))
+  const snap = await getDocs(q)
+  return snap.docs.map(d=>({ id:d.id, ...d.data() }))
+}
+
+// Mission Steps (top-level collection)
+export async function createMissionStep(missionId: string, data: { label: string; order?: number; type?: string; nfc_tag_id?: string; ble_event_type?: string }){
+  const col = collection(db,'mission_steps')
+  const docRef = await addDoc(col, {
+    mission_id: missionId,
+    label: data.label,
+    order: data.order || 0,
+    type: data.type || 'manual',
+    nfc_tag_id: data.nfc_tag_id || null,
+    ble_event_type: data.ble_event_type || null
+  })
+  return docRef.id
+}
+
+export async function listMissionSteps(missionId: string){
+  const q = query(collection(db,'mission_steps'), where('mission_id','==',missionId), orderBy('order','asc'))
   const snap = await getDocs(q)
   return snap.docs.map(d=>({ id:d.id, ...d.data() }))
 }
@@ -64,7 +84,28 @@ export async function startSession(userId:string, missionId:string, groupId?:str
     status: 'in_progress',
     started_at: serverTimestamp()
   })
-  return docRef.id
+  const sessionId = docRef.id
+
+  // create session_steps from mission_steps
+  try{
+    const ms = await listMissionSteps(missionId)
+    for(const m of ms){
+      await addDoc(collection(db,'session_steps'), {
+        session_id: sessionId,
+        mission_step_id: m.id,
+        label: (m as any).label || '',
+        started_at: serverTimestamp(),
+        finished_at: null,
+        result: 'not_started',
+        lap_ms: null,
+        order: (m as any).order || 0
+      })
+    }
+  }catch(e){
+    // ignore
+  }
+
+  return sessionId
 }
 
 export async function finishSession(sessionId:string, finishedAt?:any){
@@ -80,3 +121,21 @@ export async function listTodaySessionsByGroup(groupId:string){
 }
 
 export { db }
+
+export async function listTodaySessionsByUser(userId:string){
+  const today = new Date().toISOString().slice(0,10)
+  const q = query(collection(db,'sessions'), where('user_id','==',userId), where('date','==',today))
+  const snap = await getDocs(q)
+  return snap.docs.map(d=>({ id:d.id, ...d.data() }))
+}
+
+export async function listSessionSteps(sessionId:string){
+  const q = query(collection(db,'session_steps'), where('session_id','==',sessionId), orderBy('order','asc'))
+  const snap = await getDocs(q)
+  return snap.docs.map(d=>({ id:d.id, ...d.data() }))
+}
+
+export async function completeSessionStep(sessionStepId:string){
+  const ref = doc(db,'session_steps',sessionStepId)
+  await updateDoc(ref, { finished_at: serverTimestamp(), result: 'success' })
+}

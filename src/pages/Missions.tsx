@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useAuth } from '../services/auth'
-import { createMission, listMissions } from '../services/firestore'
+import { createMission, listMissions, createMissionStep, listMissionSteps } from '../services/firestore'
 
 export default function Missions(){
   const { user } = useAuth()
@@ -13,12 +13,24 @@ export default function Missions(){
     listMissions(user.uid).then(setMissions).catch(()=>{})
   },[user])
 
+  const loadSteps = async (missionId:string)=>{
+    const s = await listMissionSteps(missionId)
+    setMissions(prev=> prev.map(m=> m.id===missionId ? { ...m, steps: s } : m))
+  }
+
   const add = async ()=>{
     if(!user) return
     await createMission(user.uid, { name, wake_time: wakeTime })
     setName('')
     const updated = await listMissions(user.uid)
     setMissions(updated)
+  }
+
+  const addStep = async (missionId:string)=>{
+    const label = prompt('ステップ名を入力')
+    if(!label) return
+    await createMissionStep(missionId, { label })
+    await loadSteps(missionId)
   }
 
   return (
@@ -39,7 +51,16 @@ export default function Missions(){
         {missions.length===0 && <div>まだミッションがありません</div>}
         {missions.map(m=> (
           <div key={m.id} style={{padding:8,borderBottom:'1px solid #eee'}}>
-            <strong>{m.name}</strong> <div style={{fontSize:12,color:'#666'}}>起床時間: {m.wake_time}</div>
+            <div style={{display:'flex',justifyContent:'space-between'}}>
+              <strong>{m.name}</strong>
+              <div><button className="button" onClick={()=>addStep(m.id)}>ステップ追加</button></div>
+            </div>
+            <div style={{fontSize:12,color:'#666'}}>起床時間: {m.wake_time}</div>
+            <div style={{marginTop:8}}>
+              {(m.steps || []).map((s:any)=> (
+                <div key={s.id} style={{padding:6,borderTop:'1px solid #f0f0f0'}}>{s.order}. {s.label} <span style={{fontSize:12,color:'#666'}}>({s.type})</span></div>
+              ))}
+            </div>
           </div>
         ))}
       </div>
