@@ -151,7 +151,7 @@ export async function finishSessionAndCompute(sessionId:string){
   const group = await getGroup(groupId)
   if(!group) return
 
-  if(group.mode === 'RACE'){
+  if((group as any).mode === 'RACE'){
     // compute rank based on finished_at asc
     const q = query(collection(db,'sessions'), where('group_id','==',groupId), where('date','==',date), where('status','==','completed'), orderBy('finished_at','asc'))
     const snap = await getDocs(q)
@@ -162,10 +162,10 @@ export async function finishSessionAndCompute(sessionId:string){
     }
   }
 
-  if(group.mode === 'ALL'){
+  if((group as any).mode === 'ALL'){
     // check whether all members have a completed session today
-    const members = await listGroupMembers(groupId)
-    const memberIds = members.map(m=>m.user_id)
+  const members = await listGroupMembers(groupId)
+  const memberIds = members.map((m:any)=>m.user_id)
     const q = query(collection(db,'sessions'), where('group_id','==',groupId), where('date','==',date), where('status','==','completed'))
     const snap = await getDocs(q)
     const cleared = snap.docs.map(d=> (d.data() as any).user_id )
