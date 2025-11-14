@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { useAuth } from '../services/auth'
 import { listTodaySessionsByUser, listSessionSteps, completeSessionStep } from '../services/firestore'
-import { playSuccess } from '../services/sound'
-import { useSound } from '../services/sound'
+import { playSuccess } from '../services/soundProvider'
+import { useSound } from '../services/soundProvider'
 
 export default function Sessions(){
   const { user } = useAuth()

@@ -1,10 +1,9 @@
-// Simple WebAudio-based sound helper for micro-interactions
 import React, { createContext, useContext, useState, useEffect } from 'react'
 
-type SoundContextValue = { muted:boolean; setMuted:(v:boolean)=>void }
+type SoundContextValue = { muted: boolean; setMuted: (v:boolean)=>void }
 const SoundContext = createContext<SoundContextValue>({ muted:false, setMuted:()=>{} })
 
-export function SoundProvider({children}:{children:React.ReactNode}){
+export function SoundProvider({ children }: { children: React.ReactNode }){
   const [muted, setMuted] = useState<boolean>(()=>{
     try{ return localStorage.getItem('mz_sound_muted') === '1' }catch(e){ return false }
   })
