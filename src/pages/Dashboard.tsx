@@ -4,6 +4,7 @@ import { useAuth } from '../services/auth'
 import Missions from './Missions'
 import Groups from './Groups'
 import { startSession } from '../services/firestore'
+import DataManager from '../components/DataManager'
 
 export default function Dashboard(){
   usePageMeta('ダッシュボード','今日のセッションを確認・開始できます')
@@ -56,6 +57,7 @@ export default function Dashboard(){
               }}>アカウントにする（メールで保存）</button>
             </div>
           </div>
+          <DataManager />
         </div>
       )}
 
