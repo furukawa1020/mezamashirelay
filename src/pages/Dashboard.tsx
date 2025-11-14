@@ -7,7 +7,7 @@ import { startSession } from '../services/firestore'
 
 export default function Dashboard(){
   usePageMeta('ダッシュボード','今日のセッションを確認・開始できます')
-  const { user, signOut } = useAuth()
+  const { user, signOut, sendAccountClaimLink } = useAuth()
   const [view, setView] = useState<'home'|'missions'|'groups'>('home')
 
   const onStart = async ()=>{
@@ -46,6 +46,15 @@ export default function Dashboard(){
               window.dispatchEvent(new CustomEvent('mezamashi:step', { detail: { type:'manual', stepId:'debug-1' } }))
               alert('ダミーイベントを送信しました')
             }}>ダミー完了</button>
+            <div style={{marginTop:12}}>
+              <button className="button" onClick={async ()=>{
+                const email = prompt('アカウントにするメールアドレスを入力してください')
+                if(!email) return
+                const ok = await sendAccountClaimLink(email)
+                if(ok) alert('メールを送信しました。受信したリンクでアカウントを確定してください（同じ端末で開くと匿名データと紐付きます）')
+                else alert('送信に失敗しました')
+              }}>アカウントにする（メールで保存）</button>
+            </div>
           </div>
         </div>
       )}
